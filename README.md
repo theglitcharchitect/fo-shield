@@ -120,6 +120,10 @@ Runs 5 end-to-end checks (seed, index, L1/L2 compile, dispatch + writeback, OAut
 
 ---
 
+## 🎬 Demo Video
+
+[fo-shield-demo-2min-voiced.mp4](docs/fo-shield-demo-2min-voiced.mp4) — 2:01 walkthrough with voiceover: the paradox, the vault, hybrid retrieval, the firewall split, a live dashboard dispatch, and the receipt writeback.
+
 ## 🖥️ Live Demo Walkthrough (`http://127.0.0.1:8090`)
 
 1. **Trigger**: `seed_vault.py` initializes `~/MemoryVault` with synthetic enterprise data (*Acme Labs Engineering Vault*) and a one-line commitment in `logs/hermes/2026-10-18.md`:
@@ -149,6 +153,7 @@ fo-shield/
 ├── LICENSE               # MIT License
 └── docs/
     ├── og-image.png              # Repo hero image
+    ├── fo-shield-demo-2min-voiced.mp4  # Demo video with voiceover (2:01)
     └── diagrams/
         ├── architecture.html     # Editorial system architecture (self-contained SVG)
         ├── firewall.html         # Editorial L1/L2 firewall pipeline
