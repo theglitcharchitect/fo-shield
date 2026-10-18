@@ -142,6 +142,7 @@ fo-shield/
 ├── custodian.py          # Single-writer nightly log compaction daemon + automated Git snapshots
 ├── seed_vault.py         # Zero-PII synthetic enterprise vault generator (RFC 2606 / RFC 5737 compliant)
 ├── verify_e2e.py         # End-to-end verification: 5 checks, zero-PII-leakage proof
+├── test_fo_mcp.py        # Live Fo MCP handshake & schema verifier (needs FO_MCP_URL)
 ├── requirements.txt      # Pinned Python dependencies (mcp pinned <2: v2 removed FastMCP)
 ├── .env.example          # Environment configuration template
 ├── .gitignore            # Secrets, venvs, and local SQLite indices never committed
