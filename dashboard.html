@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fo-Shield | Zero-Knowledge Context Firewall for Wajo Fo</title>
+  <style>
+    :root {
+      --bg-0: #090d16;
+      --bg-1: #111827;
+      --bg-2: #1e293b;
+      --border: #2e3c56;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-indigo: #6366f1;
+      --accent-green: #10b981;
+      --accent-green-bg: rgba(16, 185, 129, 0.12);
+      --accent-red: #f43f5e;
+      --accent-red-bg: rgba(244, 63, 94, 0.12);
+      --accent-amber: #f59e0b;
+      --accent-amber-bg: rgba(245, 158, 11, 0.14);
+      --mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #172554 0%, var(--bg-0) 45%);
+      color: var(--text-main);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: rgba(17, 24, 39, 0.88);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .shield-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+    }
+
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-2);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    .dot.amber {
+      background: var(--accent-amber);
+      box-shadow: 0 0 8px var(--accent-amber);
+    }
+
+    .inject-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 24px;
+      background: rgba(30, 41, 59, 0.55);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .inject-form {
+      display: flex;
+      flex: 1;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .inject-form select,
+    .inject-form input {
+      background: var(--bg-0);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: var(--sans);
+    }
+
+    .inject-form input {
+      flex: 1;
+      font-family: var(--mono);
+    }
+
+    .btn {
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-indigo), #4f46e5);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.12);
+    }
+
+    .btn-green {
+      background: var(--accent-green);
+      color: #052e16;
+      font-weight: 700;
+    }
+
+    .btn-green:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-ghost {
+      background: var(--bg-1);
+      border-color: var(--border);
+      color: var(--text-muted);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text-main);
+      border-color: var(--accent-blue);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.05fr 1.35fr 1.1fr;
+      gap: 18px;
+      padding: 18px 24px;
+      overflow: hidden;
+    }
+
+    .column {
+      background: rgba(17, 24, 39, 0.82);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: calc(100vh - 155px);
+    }
+
+    .col-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(30, 41, 59, 0.45);
+    }
+
+    .col-header h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-blue);
+      font-weight: 700;
+    }
+
+    .col-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .task-card {
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-0);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .task-card:hover {
+      border-color: var(--accent-blue);
+    }
+
+    .task-card.active {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 1px var(--accent-blue), 0 8px 20px rgba(0, 0, 0, 0.35);
+      background: rgba(30, 41, 59, 0.65);
+    }
+
+    .task-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .status-pill {
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-AWAITING_APPROVAL {
+      background: var(--accent-amber-bg);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .status-COMPLETED {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .status-COMPILING_ZERO_KNOWLEDGE_BRIEF,
+    .status-DISPATCHING_TO_FO_MCP {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+
+    .task-raw {
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chunk-card {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .chunk-header {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent-blue);
+      margin-bottom: 6px;
+    }
+
+    .chunk-score {
+      color: var(--accent-green);
+      font-weight: 700;
+    }
+
+    .chunk-body {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+      line-height: 1.4;
+      max-height: 110px;
+      overflow-y: auto;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .fact-pill {
+      padding: 8px 11px;
+      border-radius: 8px;
+      background: var(--accent-green-bg);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #a7f3d0;
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .secret-pill {
+      padding: 8px 11px;
+      border-radius: 8px;
+      background: var(--accent-red-bg);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      color: #fecdd3;
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-family: var(--mono);
+    }
+
+    textarea.brief-box {
+      width: 100%;
+      min-height: 125px;
+      background: var(--bg-0);
+      color: var(--text-main);
+      border: 1px solid var(--accent-blue);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.5;
+      resize: vertical;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .receipt-box {
+      padding: 14px;
+      border-radius: 10px;
+      background: var(--bg-0);
+      border: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      color: #e2e8f0;
+    }
+
+    .writeback-card {
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .empty-state {
+      color: var(--text-muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 36px 16px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="shield-logo">FS</div>
+      <div>
+        <h1>Fo-Shield: Zero-Knowledge Local Context Firewall</h1>
+        <p>Local Hybrid Memory Vault (FTS5 + sqlite-vec + Cross-Encoder) &rarr; L1/L2 Redaction &rarr; Wajo Fo MCP</p>
+      </div>
+    </div>
+    <div class="status-bar">
+      <span class="badge"><span class="dot" id="ws-dot"></span> <span id="ws-label">WS LIVE</span></span>
+      <span class="badge" id="model-badge">L2: claude-sonnet-4-6</span>
+      <span class="badge" id="mcp-badge">Fo MCP: Simulation</span>
+      <span class="badge" id="vault-badge">~/MemoryVault</span>
+    </div>
+  </header>
+
+  <div class="inject-bar">
+    <div class="inject-form">
+      <select id="agent-select" title="Agent Identity">
+        <option value="hermes">hermes (Local Daemon)</option>
+        <option value="claude_code">claude_code (IDE Agent)</option>
+        <option value="grokbot">grokbot (Remote Bridge)</option>
+        <option value="chatgpt_dots">chatgpt_dots (Remote Bridge)</option>
+      </select>
+      <input
+        type="text"
+        id="quick-task-input"
+        placeholder="Type a new #fo real-world errand (e.g., Request quotes for 4x 2TB Gen4 NVMe SSDs and 2x 10GbE switches delivered to the receiving dock)..."
+      />
+      <button class="btn btn-primary" onclick="injectTask()">+ Inject `- [ ] #fo` Errand</button>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-ghost" onclick="fillPreset(1)">Preset: Cluster SSD Quote</button>
+      <button class="btn btn-ghost" onclick="fillPreset(2)">Preset: Ergonomic Coach</button>
+    </div>
+  </div>
+
+  <main>
+    <section class="column">
+      <div class="col-header">
+        <h2>1. Local Vault Triggers &amp; Hybrid Retrieval</h2>
+        <span class="badge" id="task-count">0 Tasks</span>
+      </div>
+      <div class="col-body">
+        <div class="section-label">
+          <span>Detected `- [ ] #fo` Commitments</span>
+          <span>Click to Inspect</span>
+        </div>
+        <div id="task-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+        <div class="section-label" style="margin-top:10px;">
+          <span>Stage-1 RRF (sqlite-vec + FTS5) &amp; Stage-2 CrossEncoder</span>
+          <span>Top-4 Chunks</span>
+        </div>
+        <div id="chunks-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+    </section>
+
+    <section class="column">
+      <div class="col-header">
+        <h2>2. Fo-Shield Zero-Knowledge Context Firewall</h2>
+        <span class="badge" id="risk-badge">Risk: --</span>
+      </div>
+      <div class="col-body" id="firewall-panel">
+        <div class="empty-state">Select a staged `#fo` task in Column 1 to audit its L1/L2 Zero-Knowledge compilation.</div>
+      </div>
+    </section>
+
+    <section class="column">
+      <div class="col-header">
+        <h2>3. Wajo Fo MCP Dispatch &amp; Vault Writeback</h2>
+        <span class="badge" id="transport-badge">Dual-Transport MCP</span>
+      </div>
+      <div class="col-body" id="execution-panel">
+        <div class="empty-state">Approve &amp; Dispatch a sanitized brief in Column 2 to execute via Wajo Fo MCP and verify local Markdown writeback.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let tasksById = {};
+    let selectedTaskId = null;
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    async function loadInitialState() {
+      const res = await fetch("/api/state");
+      const data = await res.json();
+      document.getElementById("model-badge").textContent =
+        data.claude_live ? `L2: ${data.claude_model} (LIVE)` : `L2: ${data.claude_model} (L1 Fallback)`;
+      document.getElementById("mcp-badge").textContent =
+        data.fo_mcp_connected ? "Fo MCP: LIVE CLOUD" : "Fo MCP: Local Sim";
+      document.getElementById("vault-badge").textContent = data.vault_dir.split("/").slice(-2).join("/");
+
+      tasksById = {};
+      (data.tasks || []).forEach(t => {
+        tasksById[t.task_id] = t;
+      });
+      const ids = Object.keys(tasksById);
+      if (!selectedTaskId && ids.length > 0) {
+        selectedTaskId = ids[ids.length - 1];
+      }
+      renderAll();
+    }
+
+    function connectWebSocket() {
+      const proto = location.protocol === "https:" ? "wss:" : "ws:";
+      const ws = new WebSocket(`${proto}//${location.host}/ws`);
+      const dot = document.getElementById("ws-dot");
+      const label = document.getElementById("ws-label");
+
+      ws.onopen = () => {
+        dot.className = "dot";
+        label.textContent = "WS LIVE";
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.data && msg.data.task_id) {
+          tasksById[msg.data.task_id] = msg.data;
+          if (!selectedTaskId) {
+            selectedTaskId = msg.data.task_id;
+          }
+          renderAll();
+        }
+      };
+
+      ws.onclose = () => {
+        dot.className = "dot amber";
+        label.textContent = "RECONNECTING";
+        setTimeout(connectWebSocket, 1500);
+      };
+    }
+
+    function selectTask(taskId) {
+      selectedTaskId = taskId;
+      renderAll();
+    }
+
+    function renderAll() {
+      const taskListEl = document.getElementById("task-list");
+      const chunksListEl = document.getElementById("chunks-list");
+      const firewallEl = document.getElementById("firewall-panel");
+      const execEl = document.getElementById("execution-panel");
+
+      const tasks = Object.values(tasksById).reverse();
+      document.getElementById("task-count").textContent = `${tasks.length} Task${tasks.length === 1 ? "" : "s"}`;
+
+      if (tasks.length === 0) {
+        taskListEl.innerHTML = `<div class="empty-state">No unchecked <code>- [ ] #fo</code> tasks detected yet. Inject one above!</div>`;
+        chunksListEl.innerHTML = "";
+        return;
+      }
+
+      taskListEl.innerHTML = tasks.map(t => `
+        <div class="task-card ${t.task_id === selectedTaskId ? "active" : ""}" onclick="selectTask('${t.task_id}')">
+          <div class="task-meta">
+            <span>${escapeHtml(t.source_file)} &bull; #${t.task_id.slice(0, 6)}</span>
+            <span class="status-pill status-${t.status}">${escapeHtml(t.status.replace(/_/g, " "))}</span>
+          </div>
+          <div class="task-raw">- [ ] #fo ${escapeHtml(t.raw_task)}</div>
+        </div>
+      `).join("");
+
+      const active = tasksById[selectedTaskId] || tasks[0];
+      if (!active) return;
+
+      const compiled = active.compiled || {};
+      const chunks = compiled.retrieved_chunks || [];
+
+      if (chunks.length === 0) {
+        chunksListEl.innerHTML = `<div class="empty-state">Retrieving &amp; scoring local memory chunks...</div>`;
+      } else {
+        chunksListEl.innerHTML = chunks.map(c => `
+          <div class="chunk-card">
+            <div class="chunk-header">
+              <span>${escapeHtml(c.file_path)} &rsaquo; ${escapeHtml(c.heading)}</span>
+              <span class="chunk-score">CE+Decay: ${c.score}</span>
+            </div>
+            <div class="chunk-body">${escapeHtml(c.content)}</div>
+          </div>
+        `).join("");
+      }
+
+      document.getElementById("risk-badge").textContent = `Privacy Risk Prevented: ${compiled.privacy_risk_score || "HIGH"}`;
+      if (!active.compiled) {
+        firewallEl.innerHTML = `<div class="empty-state">Running L1 Deterministic Regex Scrubber + L2 Semantic Brief Compiler...</div>`;
+      } else {
+        const injectedHtml = (compiled.injected_facts || []).map(f =>
+          `<div class="fact-pill"><span>&#10003;</span><span>${escapeHtml(f)}</span></div>`
+        ).join("");
+
+        const withheldHtml = (compiled.withheld_secrets || []).map(s =>
+          `<div class="secret-pill"><span>&#128737;</span><span>${escapeHtml(s)}</span></div>`
+        ).join("");
+
+        const isCompleted = active.status === "COMPLETED";
+        const isDispatching = active.status === "DISPATCHING_TO_FO_MCP";
+
+        firewallEl.innerHTML = `
+          <div class="section-label">
+            <span style="color:var(--accent-green);">&#10003; Injected Execution Constraints (Safe for Fo)</span>
+            <span>${(compiled.injected_facts || []).length} Facts</span>
+          </div>
+          <div class="pill-list">${injectedHtml || '<div class="fact-pill">No extra facts needed</div>'}</div>
+
+          <div class="section-label" style="margin-top:8px;">
+            <span style="color:var(--accent-red);">&#128737; Withheld Secrets &amp; PII (Blocked from Leaving Device)</span>
+            <span>${(compiled.withheld_secrets || []).length} Redacted</span>
+          </div>
+          <div class="pill-list">${withheldHtml || '<div class="secret-pill">L1/L2 Firewall Active</div>'}</div>
+
+          <div class="section-label" style="margin-top:8px;">
+            <span>Sanitized Fo Execution Brief (Editable Before Dispatch)</span>
+            <span>${escapeHtml(compiled.compiler_engine || "")}</span>
+          </div>
+          <textarea id="brief-editor" class="brief-box" ${isCompleted || isDispatching ? "readonly" : ""}>${escapeHtml(compiled.sanitized_fo_brief || "")}</textarea>
+
+          <div class="action-row">
+            <button class="btn btn-ghost" onclick="recompileTask('${active.task_id}')" ${isCompleted || isDispatching ? "disabled" : ""}>
+              &#8635; Re-Compile Brief
+            </button>
+            <button class="btn btn-green" onclick="approveAndDispatch('${active.task_id}')" ${isCompleted || isDispatching ? "disabled" : ""}>
+              ${isCompleted ? "&#10003; Dispatched to Wajo Fo" : isDispatching ? "Dispatching to Fo MCP..." : "&#9889; Approve &amp; Dispatch to Wajo Fo MCP"}
+            </button>
+          </div>
+        `;
+      }
+
+      if (!active.fo_outcome) {
+        execEl.innerHTML = `
+          <div class="empty-state">
+            ${active.status === "DISPATCHING_TO_FO_MCP"
+              ? "Negotiating StreamableHTTP / SSE transport with Wajo Fo MCP Server..."
+              : "Awaiting human-in-the-loop Zero-Knowledge approval in Column 2."}
+          </div>
+        `;
+      } else {
+        const out = active.fo_outcome;
+        execEl.innerHTML = `
+          <div class="section-label">
+            <span>MCP Transport &amp; Tool Invocation</span>
+            <span style="color:var(--accent-green);">VERIFIED</span>
+          </div>
+          <div class="chunk-card">
+            <div class="chunk-header">
+              <span>${escapeHtml(out.mode)}</span>
+              <span>${escapeHtml(out.tool_called)}</span>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); font-family:var(--mono);">
+              Dispatched at: ${escapeHtml(out.dispatched_at || "")}
+            </div>
+          </div>
+
+          <div class="section-label">
+            <span>Wajo Fo Real-World Execution Receipt</span>
+          </div>
+          <div class="receipt-box">${escapeHtml(out.receipt)}</div>
+
+          <div class="section-label">
+            <span>Local Obsidian Vault Concurrency Writeback</span>
+          </div>
+          <div class="writeback-card">
+            <div><strong>1. Source Task Checked Off:</strong> <code>${escapeHtml(active.source_file)}</code> updated to <code>- [x] #fo [FO-SHIELD:${active.task_id}]</code></div>
+            <div style="margin-top:6px;"><strong>2. Append-Only Audit Log (fcntl.flock):</strong> Written to <code>${escapeHtml(active.audit_log_path || "logs/fo_agent/YYYY-MM-DD.md")}</code></div>
+            <div style="margin-top:6px;"><strong>3. Nightly Custodian Ready:</strong> Provenance tag queued for <code>custodian.py</code> reconciliation.</div>
+          </div>
+        `;
+      }
+    }
+
+    async function approveAndDispatch(taskId) {
+      const editor = document.getElementById("brief-editor");
+      const customBrief = editor ? editor.value : null;
+      await fetch(`/api/tasks/${taskId}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sanitized_brief: customBrief })
+      });
+    }
+
+    async function recompileTask(taskId) {
+      await fetch(`/api/tasks/${taskId}/recompile`, { method: "POST" });
+    }
+
+    async function injectTask() {
+      const input = document.getElementById("quick-task-input");
+      const agent = document.getElementById("agent-select").value;
+      const raw = input.value.trim();
+      if (!raw) return;
+      input.value = "";
+      await fetch("/api/tasks/inject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agent_id: agent, raw_task: raw })
+      });
+    }
+
+    function fillPreset(num) {
+      const input = document.getElementById("quick-task-input");
+      if (num === 1) {
+        input.value = "Request itemized vendor quotes for 4x 2TB NVMe Gen4 SSDs and 2x Managed 10GbE Desktop Switches delivered to our receiving dock under our wholesale unit ceiling.";
+      } else {
+        input.value = "Schedule a virtual ergonomic studio assessment session this week during my preferred hours and order a split mechanical keyboard tenting kit under budget.";
+      }
+    }
+
+    loadInitialState();
+    connectWebSocket();
+  </script>
+</body>
+</html>
