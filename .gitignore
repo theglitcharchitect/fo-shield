@@ -1,5 +1,25 @@
-.venv/
-__pycache__/
-*.pyc
-.DS_Store
+# Environment & Secrets
 .env
+*.env
+*.pem
+*.key
+
+# Virtual Environments & Python Bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Local SQLite Vector & FTS5 Indices (never commit binary DB locks)
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+
+# Local Vault Runtime Locks & Archives
+.custodian.lock
+logs/_archived/
+
+# OS Metadata
+.DS_Store
+Thumbs.db
