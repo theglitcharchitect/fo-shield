@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fo-Shield — System Architecture</title>
+<style>
+  :root{
+    --paper:#f6f4ee; --paper2:#ffffff; --ink:#232a35; --muted:#6d7480;
+    --soft:#9aa1ad; --rule:#d9d4c7; --accent:#bf4520;
+    --store:#e9edf2; --external:#f1ece1;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+  .wrap{overflow-x:auto;min-width:1200px;padding:24px 32px 8px;}
+  svg{display:block;width:1200px;height:auto;}
+  .ttl{font-size:26px;font-weight:700;letter-spacing:.02em;}
+  .sub{font-size:13px;fill:var(--muted);}
+  .zone{fill:none;stroke:var(--rule);stroke-width:1.5;stroke-dasharray:6 5;}
+  .zonelbl{font-size:11px;letter-spacing:.14em;fill:var(--muted);font-weight:600;}
+  .node{fill:var(--paper2);stroke:var(--rule);stroke-width:1.5;}
+  .node.store{fill:var(--store);}
+  .node.external{fill:var(--external);}
+  .node.focal{fill:var(--accent);stroke:var(--accent);}
+  .node.boundary{stroke:var(--ink);stroke-width:2;}
+  .nt{font-size:14px;font-weight:700;letter-spacing:.04em;}
+  .nb{font-size:12px;fill:var(--muted);}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;}
+  .focal .nt,.focal .nb{fill:#ffffff;}
+  .arrow{stroke:var(--ink);stroke-width:1.5;fill:none;}
+  .arrow.writeback{stroke:var(--accent);stroke-dasharray:7 5;}
+  .albl{font-size:11px;font-weight:700;letter-spacing:.1em;fill:var(--ink);}
+  .alblbg{fill:var(--paper);}
+  .legend{font-size:11px;fill:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+<svg id="fs-arch" viewBox="0 0 1200 640" role="img" aria-labelledby="fs-arch-t fs-arch-d">
+  <title id="fs-arch-t">Fo-Shield system architecture</title>
+  <desc id="fs-arch-d">A local Obsidian vault feeds a hybrid indexer, a two-stage zero-knowledge firewall, and a command-center UI, which dispatches a sanitized brief to the Wajo Fo MCP server; execution receipts write back to the vault.</desc>
+
+  <text class="ttl" x="48" y="60">FO-SHIELD SYSTEM ARCHITECTURE</text>
+  <text class="sub" x="48" y="86">Local-first memory vault and zero-knowledge context firewall for Wajo Fo</text>
+
+  <!-- zones -->
+  <rect class="zone" x="24" y="112" width="944" height="488"/>
+  <rect class="zone" x="992" y="112" width="184" height="488"/>
+  <text class="zonelbl" x="48" y="140">LOCAL HOST — ZERO CLOUD LEAKAGE</text>
+  <text class="zonelbl" x="1016" y="140">EXTERNAL</text>
+
+  <!-- arrows first -->
+  <g>
+    <line class="arrow" x1="212" y1="232" x2="296" y2="232"/>
+    <polygon points="296,232 288,228 288,236" fill="#232a35"/>
+    <line class="arrow" x1="456" y1="232" x2="540" y2="232"/>
+    <polygon points="540,232 532,228 532,236" fill="#232a35"/>
+    <line class="arrow" x1="700" y1="232" x2="784" y2="232"/>
+    <polygon points="784,232 776,228 776,236" fill="#232a35"/>
+    <line class="arrow" x1="864" y1="284" x2="864" y2="340"/>
+    <polygon points="864,340 860,332 868,332" fill="#232a35"/>
+    <path class="arrow" d="M 910 340 L 910 300 L 1040 300 L 1040 340"/>
+    <polygon points="1040,340 1036,332 1044,332" fill="#232a35"/>
+    <line class="arrow" x1="1088" y1="444" x2="1088" y2="484"/>
+    <polygon points="1088,484 1084,476 1092,476" fill="#232a35"/>
+    <path class="arrow writeback" d="M 1008 522 L 40 522 L 40 232"/>
+    <polygon points="48,232 40,228 40,236" fill="#bf4520"/>
+  </g>
+
+  <!-- arrow labels with masks -->
+  <g>
+    <rect class="alblbg" x="214" y="212" width="80" height="16"/>
+    <text class="albl" x="254" y="224" text-anchor="middle">WATCHDOG</text>
+    <rect class="alblbg" x="458" y="212" width="80" height="16"/>
+    <text class="albl" x="498" y="224" text-anchor="middle">TOP-4 RRF</text>
+    <rect class="alblbg" x="702" y="212" width="80" height="16"/>
+    <text class="albl" x="742" y="224" text-anchor="middle">SCRUBBED</text>
+    <rect class="alblbg" x="800" y="304" width="48" height="16"/>
+    <text class="albl" x="824" y="316" text-anchor="middle">BRIEF</text>
+    <rect class="alblbg" x="944" y="280" width="72" height="16"/>
+    <text class="albl" x="980" y="292" text-anchor="middle">DISPATCH</text>
+    <rect class="alblbg" x="1100" y="456" width="64" height="16"/>
+    <text class="albl" x="1132" y="468" text-anchor="middle">EXECUTES</text>
+    <rect class="alblbg" x="496" y="502" width="88" height="16"/>
+    <text class="albl" x="540" y="514" text-anchor="middle" fill="#bf4520">WRITEBACK</text>
+  </g>
+
+  <!-- nodes -->
+  <g>
+    <rect class="node store" x="52" y="180" width="160" height="104" rx="6"/>
+    <text class="nt" x="132" y="212" text-anchor="middle">OBSIDIAN VAULT</text>
+    <text class="nb mono" x="132" y="234" text-anchor="middle">/canonical · RO</text>
+    <text class="nb mono" x="132" y="254" text-anchor="middle">/logs/&lt;agent&gt;</text>
+
+    <rect class="node store" x="296" y="180" width="160" height="104" rx="6"/>
+    <text class="nt" x="376" y="212" text-anchor="middle">HYBRID INDEXER</text>
+    <text class="nb mono" x="376" y="234" text-anchor="middle">FTS5 + sqlite-vec</text>
+    <text class="nb mono" x="376" y="254" text-anchor="middle">cross-encoder · RRF</text>
+
+    <rect class="node boundary" x="540" y="180" width="160" height="104" rx="6"/>
+    <text class="nt" x="620" y="212" text-anchor="middle">L1 REGEX SCRUBBER</text>
+    <text class="nb mono" x="620" y="234" text-anchor="middle">tskey · bank · EIN</text>
+    <text class="nb mono" x="620" y="254" text-anchor="middle">HR · bastion IPs</text>
+
+    <g class="focal">
+      <rect class="node focal" x="784" y="180" width="160" height="104" rx="6"/>
+      <text class="nt" x="864" y="212" text-anchor="middle">L2 ZK COMPILER</text>
+      <text class="nb mono" x="864" y="234" text-anchor="middle">claude-sonnet-4-6</text>
+      <text class="nb" x="864" y="254" text-anchor="middle">need-to-know brief</text>
+    </g>
+
+    <rect class="node" x="784" y="340" width="160" height="104" rx="6"/>
+    <text class="nt" x="864" y="372" text-anchor="middle">COMMAND CENTER</text>
+    <text class="nb" x="864" y="394" text-anchor="middle">FastAPI + WebSocket</text>
+    <text class="nb mono" x="864" y="414" text-anchor="middle">127.0.0.1:8090</text>
+
+    <rect class="node external" x="1008" y="340" width="160" height="104" rx="6"/>
+    <text class="nt" x="1088" y="372" text-anchor="middle">WAJO FO MCP</text>
+    <text class="nb mono" x="1088" y="394" text-anchor="middle">StreamableHTTP</text>
+    <text class="nb" x="1088" y="414" text-anchor="middle">SSE fallback</text>
+
+    <rect class="node external" x="1008" y="484" width="160" height="76" rx="6"/>
+    <text class="nt" x="1088" y="512" text-anchor="middle">REAL-WORLD ACTIONS</text>
+    <text class="nb" x="1088" y="534" text-anchor="middle">calls · emails · cards</text>
+  </g>
+
+  <!-- legend -->
+  <g>
+    <rect x="48" y="612" width="14" height="14" fill="#bf4520"/>
+    <text class="legend" x="68" y="624">focal component</text>
+    <rect x="196" y="612" width="14" height="14" fill="#e9edf2" stroke="#d9d4c7"/>
+    <text class="legend" x="216" y="624">local store</text>
+    <line x1="320" y1="619" x2="348" y2="619" stroke="#bf4520" stroke-width="1.5" stroke-dasharray="7 5"/>
+    <text class="legend" x="354" y="624">execution receipt writeback</text>
+  </g>
+</svg>
+</div>
+</body>
+</html>

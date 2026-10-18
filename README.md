@@ -8,6 +8,8 @@
 > **Built for Wajo's "The GSD (Get s\*\*\* done!) Hackathon" (Supported by Anthropic)**
 > *Give Wajo Fo complete memory of your preferences, budgets, and projects—without ever uploading your private life to the cloud or leaking sensitive PII to human assistants.*
 
+![Fo-Shield](docs/og-image.png)
+
 ---
 
 ## ⚡ The Problem: The Ephemeral Context Paradox
@@ -46,6 +48,8 @@ flowchart LR
     FO -->|Execution Receipt Writeback| V
 ```
 
+[![System architecture](docs/diagrams/png/architecture.png)](docs/diagrams/architecture.html)
+
 ---
 
 ## ✨ Key Architectural Features
@@ -55,6 +59,8 @@ flowchart LR
 * **Isolated Append-Only Agent Logs (`/logs/<agent_id>/YYYY-MM-DD.md`)**: Every agent (`hermes`, `claude_code`, `grokbot`, `chatgpt_dots`, `fo_agent`) writes exclusively to its own dated log file protected by OS-level `fcntl.flock` exclusive locks.
 * **Single-Writer Nightly Custodian (`custodian.py`)**: A scheduled local job locks the vault, takes a Git snapshot, reconciles daily logs into `/canonical/*.md` with provenance tags (`[Updated: YYYY-MM-DD via <agent_id>]`), and archives processed logs to `/logs/_archived/`.
 
+
+[![Vault lifecycle](docs/diagrams/png/lifecycle.png)](docs/diagrams/lifecycle.html)
 ### 2. Two-Stage Hybrid Search + Cross-Encoder Reranking (`indexer.py`)
 * Keeps the binary index at `~/.local/share/memory-vault/index.sqlite` (outside cloud-synced folders to prevent SQLite WAL lock corruption).
 * **Stage 1 (Candidate Generation)**: Combines SQLite `FTS5` (BM25 lexical search) and `sqlite-vec` (`BAAI/bge-small-en-v1.5` 384-d embeddings) via **Reciprocal Rank Fusion (RRF)**.
@@ -65,6 +71,8 @@ Whenever any agent or user writes `- [ ] #fo <task>` in any Markdown file:
 * **L1 Deterministic Regex Guard**: Immediately redacts Tailscale keys (`tskey-*`), bank/card numbers, corporate EINs, employee IDs, and internal bastion IPs before context ever touches an LLM.
 * **L2 Claude Sonnet 4.6 Brief Compiler**: Synthesizes a self-contained, minimum-viable brief for Fo while outputting a transparent audit trail of **Injected Need-to-Know Facts** (green pills) vs. **Withheld Secrets** (red shields). Runs without an API key in deterministic L1-only fallback mode.
 
+
+[![Two-stage firewall](docs/diagrams/png/firewall.png)](docs/diagrams/firewall.html)
 ### 4. Dual-Transport Fo MCP Client & Closed-Loop Writeback
 * Auto-negotiates MCP `StreamableHTTP` (`streamablehttp_client`) and falls back to `SSE` (`sse_client`), dynamically inspecting `inputSchema` properties on the remote Fo MCP server. Leave `FO_MCP_URL` blank to run in instant demo simulation mode.
 * Once Fo completes the task, Fo-Shield atomically checks off `- [x] #fo [FO-SHIELD:<id>]` in the source Markdown file and appends the structured execution receipt to `/logs/fo_agent/YYYY-MM-DD.md`.
@@ -110,18 +118,15 @@ Runs 5 end-to-end checks (seed, index, L1/L2 compile, dispatch + writeback, OAut
 
 ## 🖥️ Live Demo Walkthrough (`http://127.0.0.1:8090`)
 
-1. **Trigger**: `seed_vault.py` initializes `~/MemoryVault` with synthetic enterprise data (*Acme Labs Engineering Vault*) and a 1-line commitment in `logs/hermes/2026-10-18.md`:
+1. **Trigger**: `seed_vault.py` initializes `~/MemoryVault` with synthetic enterprise data (*Acme Labs Engineering Vault*) and a one-line commitment in `logs/hermes/2026-10-18.md`:
    ```markdown
    - [ ] #fo Book an ergonomic workspace assessment session for this week and order a VESA dual-monitor desk mount delivered to the receiving dock under budget.
    ```
-2. **Local Retrieval**: `indexer.py` retrieves the top 4 chunks across `canonical/profile_and_prefs.md` and `canonical/workstation_and_wellness.md`.
+2. **Local Retrieval**: `indexer.py` retrieves the top 4 chunks from `canonical/profile_and_prefs.md` and `canonical/workstation_and_wellness.md`.
 3. **Zero-Knowledge Audit**:
-   * **Injected to Fo (Green)**: Window `10:00 AM–2:00 PM UTC`, Delivery address `742 Evergreen Terrace Suite 200 Concierge`, Consultation cap `$85 USD`, VESA mount cap `$110 USD`.
-   * **Blocked Locally (Red)**: Corporate Bank Account `#0000-1111-2222-3333`, Tax ID `EIN-99-0000000-XX`, Employee ID `EMP-ACME-2026-00421`, Group Policy Key `ShieldPlan-GRP-00099-TEST-PRIVATE`.
+   * **Injected to Fo (Green)**: Window `10:00 AM–2:00 PM UTC`, delivery address `742 Evergreen Terrace Suite 200 Concierge`, consultation cap `$85 USD`, VESA mount cap `$110 USD`.
+   * **Blocked Locally (Red)**: Corporate bank account `#0000-1111-2222-3333`, tax ID `EIN-99-0000000-XX`, employee ID `EMP-ACME-2026-00421`, group policy key `ShieldPlan-GRP-00099-TEST-PRIVATE`.
 4. **Dispatch & Writeback**: Click **Approve & Dispatch to Wajo Fo MCP**. Fo executes the task, checks off the box in Obsidian, and writes the receipt to `/logs/fo_agent/2026-10-18.md`.
-
----
-
 ## 📂 Repository Structure
 
 ```text

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fo-Shield — Two-Stage Zero-Knowledge Firewall</title>
+<style>
+  :root{
+    --paper:#f6f4ee; --paper2:#ffffff; --ink:#232a35; --muted:#6d7480;
+    --soft:#9aa1ad; --rule:#d9d4c7; --accent:#bf4520;
+    --store:#e9edf2; --green:#ddefe1; --red:#f6dfe0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+  .wrap{overflow-x:auto;min-width:1200px;padding:24px 32px 8px;}
+  svg{display:block;width:1200px;height:auto;}
+  .ttl{font-size:26px;font-weight:700;letter-spacing:.02em;}
+  .sub{font-size:13px;fill:var(--muted);}
+  .node{fill:var(--paper2);stroke:var(--rule);stroke-width:1.5;}
+  .node.store{fill:var(--store);}
+  .node.focal{fill:var(--accent);stroke:var(--accent);}
+  .node.boundary{stroke:var(--ink);stroke-width:2;}
+  .node.green{fill:var(--green);stroke:#3d7a4e;stroke-width:1.5;}
+  .node.red{fill:var(--red);stroke:#a33b3b;stroke-width:1.5;}
+  .nt{font-size:14px;font-weight:700;letter-spacing:.04em;}
+  .nb{font-size:12px;fill:var(--muted);}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;}
+  .focal .nt,.focal .nb{fill:#ffffff;}
+  .struck{text-decoration:line-through;}
+  .arrow{stroke:var(--ink);stroke-width:1.5;fill:none;}
+  .albl{font-size:11px;font-weight:700;letter-spacing:.1em;fill:var(--ink);}
+  .alblbg{fill:var(--paper);}
+  .legend{font-size:11px;fill:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+<svg id="fs-firewall" viewBox="0 0 1200 640" role="img" aria-labelledby="fs-firewall-t fs-firewall-d">
+  <title id="fs-firewall-t">Fo-Shield two-stage zero-knowledge firewall</title>
+  <desc id="fs-firewall-d">A retrieved chunk passes a deterministic regex scrubber, then a Claude compiler splits it into injected need-to-know facts and withheld secrets, producing a sanitized minimum-viable brief.</desc>
+
+  <text class="ttl" x="48" y="60">TWO-STAGE ZERO-KNOWLEDGE FIREWALL</text>
+  <text class="sub" x="48" y="86">Every retrieved chunk is scrubbed, then compiled. Secrets never leave the machine.</text>
+
+  <!-- arrows first -->
+  <g>
+    <line class="arrow" x1="216" y1="328" x2="296" y2="328"/>
+    <polygon points="296,328 288,324 288,332" fill="#232a35"/>
+    <line class="arrow" x1="456" y1="328" x2="536" y2="328"/>
+    <polygon points="536,328 528,324 528,332" fill="#232a35"/>
+    <path class="arrow" d="M 616 268 L 616 218 L 776 218"/>
+    <polygon points="776,218 768,214 768,222" fill="#232a35"/>
+    <path class="arrow" d="M 616 388 L 616 462 L 776 462"/>
+    <polygon points="776,462 768,458 768,466" fill="#232a35"/>
+    <path class="arrow" d="M 1024 218 L 1036 218 L 1036 300 L 1048 300"/>
+    <polygon points="1048,300 1040,296 1040,304" fill="#232a35"/>
+    <path class="arrow" d="M 1024 462 L 1036 462 L 1036 396 L 1048 396"/>
+    <polygon points="1048,396 1040,392 1040,400" fill="#232a35"/>
+  </g>
+
+  <!-- arrow labels -->
+  <g>
+    <rect class="alblbg" x="222" y="308" width="68" height="16"/>
+    <text class="albl" x="256" y="320" text-anchor="middle">RETRIEVED</text>
+    <rect class="alblbg" x="462" y="308" width="68" height="16"/>
+    <text class="albl" x="496" y="320" text-anchor="middle">SCRUBBED</text>
+    <rect class="alblbg" x="628" y="238" width="52" height="16"/>
+    <text class="albl" x="654" y="250" text-anchor="middle">FACTS</text>
+    <rect class="alblbg" x="628" y="420" width="64" height="16"/>
+    <text class="albl" x="660" y="432" text-anchor="middle">SECRETS</text>
+  </g>
+
+  <!-- nodes -->
+  <g>
+    <rect class="node store" x="56" y="268" width="160" height="120" rx="6"/>
+    <text class="nt" x="136" y="304" text-anchor="middle">RAW CHUNK</text>
+    <text class="nb" x="136" y="328" text-anchor="middle">top-4 retrieved</text>
+    <text class="nb mono" x="136" y="350" text-anchor="middle">vault text</text>
+
+    <rect class="node boundary" x="296" y="268" width="160" height="120" rx="6"/>
+    <text class="nt" x="376" y="300" text-anchor="middle">L1 REGEX SCRUBBER</text>
+    <text class="nb" x="376" y="324" text-anchor="middle">deterministic</text>
+    <text class="nb mono" x="376" y="346" text-anchor="middle">tskey·bank·EIN·HR·IP</text>
+
+    <g class="focal">
+      <rect class="node focal" x="536" y="268" width="160" height="120" rx="6"/>
+      <text class="nt" x="616" y="304" text-anchor="middle">L2 ZK COMPILER</text>
+      <text class="nb mono" x="616" y="328" text-anchor="middle">claude-sonnet-4-6</text>
+      <text class="nb" x="616" y="350" text-anchor="middle">need-to-know only</text>
+    </g>
+
+    <rect class="node green" x="776" y="148" width="248" height="140" rx="6"/>
+    <text class="nt" x="900" y="180" text-anchor="middle">INJECTED · NEED-TO-KNOW</text>
+    <text class="nb" x="900" y="206" text-anchor="middle">10:00 AM–2:00 PM UTC</text>
+    <text class="nb" x="900" y="228" text-anchor="middle">$85 consult · $110 VESA cap</text>
+    <text class="nb" x="900" y="250" text-anchor="middle">742 Evergreen Terrace</text>
+
+    <rect class="node red" x="776" y="392" width="248" height="140" rx="6"/>
+    <text class="nt" x="900" y="424" text-anchor="middle">WITHHELD · SECRETS</text>
+    <text class="nb mono struck" x="900" y="448" text-anchor="middle">0000-1111-2222-3333</text>
+    <text class="nb mono struck" x="900" y="468" text-anchor="middle">EIN-99-0000000-XX</text>
+    <text class="nb mono struck" x="900" y="488" text-anchor="middle">EMP-ACME-2026-00421</text>
+    <text class="nb mono struck" x="900" y="508" text-anchor="middle">tskey-auth-***</text>
+
+    <rect class="node store" x="1048" y="268" width="136" height="160" rx="6"/>
+    <text class="nt" x="1116" y="320" text-anchor="middle">SANITIZED</text>
+    <text class="nt" x="1116" y="342" text-anchor="middle">BRIEF</text>
+    <text class="nb" x="1116" y="368" text-anchor="middle">minimum-viable</text>
+    <text class="nb" x="1116" y="388" text-anchor="middle">for Wajo Fo</text>
+  </g>
+
+  <!-- legend -->
+  <g>
+    <rect x="48" y="560" width="14" height="14" fill="#bf4520"/>
+    <text class="legend" x="68" y="572">focal component</text>
+    <rect x="196" y="560" width="14" height="14" fill="#ddefe1" stroke="#3d7a4e"/>
+    <text class="legend" x="216" y="572">injected to Fo</text>
+    <rect x="336" y="560" width="14" height="14" fill="#f6dfe0" stroke="#a33b3b"/>
+    <text class="legend" x="356" y="572">withheld locally</text>
+    <text class="legend" x="48" y="596">Seed secrets shown are synthetic (RFC 2606 / RFC 5737). Zero real PII.</text>
+  </g>
+</svg>
+</div>
+</body>
+</html>
