@@ -22,6 +22,10 @@ from fo_shield_server import (
 from oauth_gateway import app as oauth_app, compute_pkce_s256
 from custodian import run_custodian
 
+# Synthetic fixtures ONLY (RFC 2606 / RFC 5737 style). These are not real
+# credentials. They exist so the e2e suite can prove the L1 scrubber catches
+# secret-shaped strings. GitHub secret scanning may flag the tskey-shaped
+# fixture below; it is fake by construction ("k00000TEST-example").
 FORBIDDEN_RAW_SECRETS = [
     "0000-1111-2222-3333",
     "EIN-99-0000000-XX",
